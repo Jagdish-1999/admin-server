@@ -1,8 +1,8 @@
 import express from "express";
 import {
-	createUpdateProduct,
-	deleteProductWithId,
-	fetchProducts,
+  createUpdateProduct,
+  deleteProductWithId,
+  fetchProducts,
 } from "../controllers/product.controller";
 import { uploadImages } from "../middlewares/multer.middleware";
 
