@@ -75,7 +75,7 @@ const createUpdateProduct = asyncHandler(
     }
 
     if (product) {
-      res.send(
+      res.json(
         new ApiResponse({
           statusCode: 200,
           data: product,
@@ -83,7 +83,7 @@ const createUpdateProduct = asyncHandler(
         })
       );
     } else {
-      res.status(500).send(
+      res.status(500).json(
         new ApiError({
           statusCode: 500,
           message: "Product creation failed",
@@ -103,7 +103,7 @@ const deleteProductWithId = asyncHandler(
     }
     const response = await Products.deleteOne({ _id: id });
     if (response.acknowledged) {
-      res.send(
+      res.json(
         new ApiResponse({
           statusCode: 200,
           data: [],
@@ -111,7 +111,7 @@ const deleteProductWithId = asyncHandler(
         })
       );
     } else {
-      res.send(
+      res.json(
         new ApiResponse({
           statusCode: 500,
           data: [],

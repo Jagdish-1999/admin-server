@@ -6,12 +6,12 @@ type AsyncRequestHandler = (
   next?: NextFunction
 ) => Promise<any>;
 
-const asyncHandler = (requestHandler: AsyncRequestHandler): RequestHandler => {
-  return (req: Request, res: Response, next?: NextFunction): void => {
+const asyncHandler =
+  (requestHandler: AsyncRequestHandler): RequestHandler =>
+  (req: Request, res: Response, next?: NextFunction): void => {
     Promise.resolve(requestHandler(req, res, next)).catch(
       (error) => next && next(error)
     );
   };
-};
 
 export { asyncHandler };
