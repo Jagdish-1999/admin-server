@@ -8,6 +8,7 @@ import { uploadImageToCloudinary } from "../middlewares/cloudinary.middleware";
 import { ProductImagesTypes } from "../types";
 import { ApiError } from "../utils/api-error";
 import { deleteImagesFromCloudinary } from "../utils/cloudinary-actions";
+import { logger } from "../utils/logger";
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find({ __v: 0 }).sort({ updatedAt: -1 });
@@ -30,8 +31,7 @@ const createUpdateProduct = asyncHandler(
 
     const imageFiles = await Promise.all(
       files.map(async (file) => {
-        const response = await uploadImageToCloudinary(file.path);
-        console.log("Cloudinary Response ", response);
+        const response = await uploadImageToCloudinary(file.path, "products");
         return { url: response?.url, id: response?.public_id };
       })
     );
@@ -44,18 +44,21 @@ const createUpdateProduct = asyncHandler(
     let existingImages: ProductImagesTypes[] = [];
     if (id) {
       product = (await Products.findById(id)) as ProductDocument;
+      const imagesOnDB = product.images;
+      let availableIdsForDelete: string[] = [];
       if (imagesInPayload.length) {
-        const imagesOnDB = product.images;
-        const availableIdsForDelete = imagesOnDB
+        availableIdsForDelete = imagesOnDB
           .filter((eachImage) => !imagesInPayload.includes(eachImage.id))
           .map((ids) => ids.id);
-        // Checking if images available for delete when updating product
-        if (availableIdsForDelete.length)
-          await deleteImagesFromCloudinary(availableIdsForDelete);
-        existingImages = product.images.filter(
-          (eachImg) => !availableIdsForDelete.includes(eachImg.id)
-        );
+      } else {
+        availableIdsForDelete = imagesOnDB.map((ids) => ids.id);
       }
+      // Checking if images available for delete when updating product
+      if (availableIdsForDelete.length)
+        await deleteImagesFromCloudinary(availableIdsForDelete);
+      existingImages = product.images.filter(
+        (eachImg) => !availableIdsForDelete.includes(eachImg.id)
+      );
     }
     const productData = { ...body, images: [...existingImages, ...imageFiles] };
     if (product) {

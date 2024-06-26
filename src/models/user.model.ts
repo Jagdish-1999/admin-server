@@ -3,17 +3,15 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
 export interface UserType extends Document {
-  userName: string;
+  name: string;
   email: string;
-  fullName: string;
   avatar: string;
-  coverImage?: string;
   password: string;
 }
 
 const userSchema = new Schema(
   {
-    userName: {
+    name: {
       type: String,
       required: true,
       unique: true,
@@ -28,24 +26,10 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
     },
-    fullName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     avatar: {
       type: String, // cloudinary url
       required: true,
     },
-    coverImage: {
-      type: String, // cloudinary url
-    },
-    watchHistory: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Video",
-      },
-    ],
     password: {
       type: String,
       required: [true, "Password is required"],

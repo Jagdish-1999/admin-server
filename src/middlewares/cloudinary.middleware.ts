@@ -8,7 +8,10 @@ cloudinary.config({
 });
 
 // Define an upload middleware function
-export const uploadImageToCloudinary = async (bufferData: any) => {
+export const uploadImageToCloudinary = async (
+  bufferData: any,
+  folder: string
+) => {
   try {
     if (!bufferData) {
       throw new Error("Image not found");
@@ -17,8 +20,8 @@ export const uploadImageToCloudinary = async (bufferData: any) => {
     const result = await cloudinary.uploader.upload(
       bufferData.toString("base64"),
       {
-        resource_type: "auto",
-        folder: "ecommerse-admin", // Optional folder in Cloudinary
+        resource_type: "image",
+        folder: folder ? `ecommerse-admin/${folder}` : "ecommerse-admin", // Optional folder in Cloudinary,
       }
     );
     return result;

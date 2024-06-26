@@ -22,7 +22,9 @@ app.use(
 
 // routes
 import { productRouter } from "./routes/product.route";
+import { userRouter } from "./routes/user.route";
 
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/user", userRouter);
 
 export { app };
