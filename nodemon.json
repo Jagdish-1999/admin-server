@@ -1,5 +1,5 @@
 {
   "watch": ["src"],
   "ext": "ts",
-  "exec": "concurrently \"npx tsc --watch\" \"ts-node src/index.ts\""
+  "exec": "npx tsc -w & ts-node -P tsconfig.json src/index.ts"
 }

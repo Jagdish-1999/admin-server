@@ -4,7 +4,7 @@ import { connectToDB } from "./db";
 
 dotenv.config({ path: "./.env.local" });
 
-const port = process.env.PORT;
+const port = process.env.PORT || 8000;
 
 connectToDB().then(() => {
   app.on("Error", (error) => {

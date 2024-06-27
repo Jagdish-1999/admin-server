@@ -10,7 +10,7 @@ cloudinary.config({
 // Define an upload middleware function
 export const uploadImageToCloudinary = async (
   bufferData: any,
-  folder: string
+  folder?: string
 ) => {
   try {
     if (!bufferData) {

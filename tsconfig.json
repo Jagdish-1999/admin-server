@@ -1,13 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "target": "ES2016",
+    "module": "CommonJS",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "typeRoots": ["./src", "./node_modules/@types"],
+    "types": ["node", "express"]
   },
-  "include": ["src/**/*.ts", "express.d.ts"],
+  "include": ["src/**/*.ts", "src/express.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

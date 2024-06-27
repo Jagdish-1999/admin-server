@@ -8,7 +8,6 @@ import { uploadImageToCloudinary } from "../middlewares/cloudinary.middleware";
 import { ProductImagesTypes } from "../types";
 import { ApiError } from "../utils/api-error";
 import { deleteImagesFromCloudinary } from "../utils/cloudinary-actions";
-import { logger } from "../utils/logger";
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find({ __v: 0 }).sort({ updatedAt: -1 });
@@ -86,12 +85,10 @@ const createUpdateProduct = asyncHandler(
         })
       );
     } else {
-      res.status(500).json(
-        new ApiError({
-          statusCode: 500,
-          message: "Product creation failed",
-        })
-      );
+      throw new ApiError({
+        statusCode: 500,
+        message: "Product creation failed",
+      });
     }
   }
 );
@@ -114,13 +111,10 @@ const deleteProductWithId = asyncHandler(
         })
       );
     } else {
-      res.json(
-        new ApiResponse({
-          statusCode: 500,
-          data: [],
-          message: "Product not deleted!",
-        })
-      );
+      throw new ApiError({
+        statusCode: 500,
+        message: "Product not deleted!",
+      });
     }
   }
 );

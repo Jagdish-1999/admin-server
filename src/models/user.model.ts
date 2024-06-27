@@ -1,23 +1,45 @@
 import mongoose, { Document, Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { logger } from "../utils/logger";
+import { ApiError } from "../utils/api-error";
 
+export interface AvatarType {
+  url: string;
+  id: string;
+}
 export interface UserType extends Document {
   name: string;
   email: string;
-  avatar: string;
+  avatar: AvatarType;
   password: string;
+  createdAt: string;
+  updatedAt: string;
+  refreshToken: string;
+  _id: string;
+
+  isPasswordCorrect(password: string): Promise<boolean>;
+  generateAccessToken(): string;
+  generateRefreshToken(): string;
 }
+
+const avatarSchema = new Schema(
+  {
+    url: { type: String },
+    id: { type: String },
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema(
   {
     name: {
       type: String,
       required: true,
-      unique: true,
+      unique: false,
       lowercase: true,
       trim: true,
-      index: true,
+      index: false,
     },
     email: {
       type: String,
@@ -27,7 +49,7 @@ const userSchema = new Schema(
       trim: true,
     },
     avatar: {
-      type: String, // cloudinary url
+      type: [avatarSchema],
       required: true,
     },
     password: {
@@ -48,7 +70,20 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCorrect = async function (password: string) {
-  return await bcrypt.compare(password, this.password);
+  if (!password || !this.password) {
+    throw new ApiError({
+      statusCode: 500,
+      message: "Data and hashed argument required!",
+    });
+  }
+  try {
+    return await bcrypt.compare(password, this.password);
+  } catch (error) {
+    throw new ApiError({
+      statusCode: 500,
+      message: "Error comparing password",
+    });
+  }
 };
 
 userSchema.methods.generateAccessToken = function () {
@@ -77,4 +112,4 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const User = mongoose.model("User", userSchema);
+export const User = mongoose.model<UserType>("User", userSchema);
