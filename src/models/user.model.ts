@@ -49,7 +49,7 @@ const userSchema = new Schema(
       trim: true,
     },
     avatar: {
-      type: [avatarSchema],
+      type: avatarSchema,
       required: true,
     },
     password: {

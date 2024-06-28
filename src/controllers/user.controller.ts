@@ -8,7 +8,7 @@ import { uploadImageToCloudinary } from "../middlewares/cloudinary.middleware";
 import { unlinkFile } from "../utils/unlinkFile";
 import { logger } from "../utils/logger";
 
-// these option are allowing that cookie is modifiable only on server not on user mechine
+// these option are allowing that cookie is modifiable only on server not on user machine
 export const cookiesOptions = {
   httpOnly: true,
   secure: true,
@@ -72,6 +72,7 @@ const generateAccessRefreshToken = async (userId: string) => {
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
+    user.save({ validateBeforeSave: false });
     return { accessToken, refreshToken };
   } catch (error) {
     throw new ApiError({
@@ -130,10 +131,35 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     );
 });
 
+const logoutUser = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        refreshToken: "",
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  logger("User", user);
+
+  res
+    .status(200)
+    .clearCookie("accessToken", cookiesOptions)
+    .clearCookie("refreshToken", cookiesOptions)
+    .json(
+      new ApiResponse({
+        statusCode: 200,
+        message: "User logged out successfully",
+      })
+    );
+});
+
 const fetchUser = asyncHandler(
   async (req: Request & { user?: UserType }, res: Response) => {
-    logger("request", req?.user);
-
     try {
       res.json(
         new ApiResponse({
@@ -143,9 +169,9 @@ const fetchUser = asyncHandler(
         })
       );
     } catch (error) {
-      logger("error in fetchUser", error);
+      throw new ApiError({ statusCode: 500, message: "User not fetched" });
     }
   }
 );
 
-export { registerUser, loginUser, fetchUser };
+export { registerUser, loginUser, fetchUser, logoutUser };
