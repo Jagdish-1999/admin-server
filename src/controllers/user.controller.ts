@@ -14,6 +14,22 @@ export const cookiesOptions = {
   secure: true,
 };
 
+const fetchUser = asyncHandler(
+  async (req: Request & { user?: UserType }, res: Response) => {
+    try {
+      res.json(
+        new ApiResponse({
+          statusCode: 200,
+          data: req?.user,
+          message: "User fetched successfully",
+        })
+      );
+    } catch (error) {
+      throw new ApiError({ statusCode: 500, message: "User not fetched" });
+    }
+  }
+);
+
 const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 
@@ -24,10 +40,12 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   const isUserExist = await User.findOne({ email });
   const avatarLocalPath = req.file?.path;
 
+  logger("is user exist", isUserExist);
+
   if (isUserExist) {
     unlinkFile(avatarLocalPath);
     throw new ApiError({
-      message: `Account is already created with this email <${email}>!`,
+      message: `Account already exist with this email <${email}>!`,
       statusCode: 409,
     });
   }
@@ -57,7 +75,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
   res.status(201).json(
     new ApiResponse({
       statusCode: 201,
-      message: "User created successfully",
+      message: `Account created with this email ${email} successfully`,
       data: user,
     })
   );
@@ -118,7 +136,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     .json(
       new ApiResponse({
         statusCode: 200,
-        message: "User created",
+        message: "User logged in successfully",
         data: {
           id: user._id,
           name: user.name,
@@ -157,21 +175,5 @@ const logoutUser = asyncHandler(async (req, res) => {
       })
     );
 });
-
-const fetchUser = asyncHandler(
-  async (req: Request & { user?: UserType }, res: Response) => {
-    try {
-      res.json(
-        new ApiResponse({
-          statusCode: 200,
-          data: req?.user,
-          message: "User fetched successfully",
-        })
-      );
-    } catch (error) {
-      throw new ApiError({ statusCode: 500, message: "User not fetched" });
-    }
-  }
-);
 
 export { registerUser, loginUser, fetchUser, logoutUser };

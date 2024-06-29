@@ -1,11 +1,11 @@
 import { Products } from "../models/product.model";
-import { deleteImagesFromCloudinary } from "./cloudinary-actions";
+import { deleteImagesOnCloudinary } from "./cloudinary-actions";
 
 export const deleteImagesFromCnrAndDb = async (
   availableIdsForDelete: string[]
 ) => {
   // Remove images from cloudinary
-  await deleteImagesFromCloudinary(availableIdsForDelete);
+  await deleteImagesOnCloudinary(availableIdsForDelete);
   // Remove images from Database
   await Products.updateMany(
     { "images.id": { $in: availableIdsForDelete } },

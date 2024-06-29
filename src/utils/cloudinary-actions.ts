@@ -1,33 +1,52 @@
-import { v2 as cloudinary } from "cloudinary";
+import { UploadApiResponse, v2 as cloudinary } from "cloudinary";
+import { logger } from "./logger";
 
-export const checkImageExistsOnCloudinary = async (publicId: string) => {
-  return new Promise((resolve, reject) => {
-    cloudinary.api.resource(publicId, (error, result) => {
-      if (error) {
-        if (error.http_code === 404) {
-          resolve(false);
-        } else {
-          reject(error);
-        }
-      } else {
-        resolve(true);
-      }
-    });
-  });
+interface CloudinaryDeleteResponse {
+  result: string;
+}
+
+const deleteImagesOnCloudinary = async (
+  publicIds: string[]
+): Promise<boolean> => {
+  try {
+    const results: CloudinaryDeleteResponse[] = await Promise.all(
+      publicIds.map((id) => cloudinary.uploader.destroy(id))
+    );
+    logger("results", results);
+    return results.every((result) => result.result === "ok");
+  } catch (error) {
+    console.error("Error deleting images from Cloudinary:", error);
+    logger("error", error);
+
+    return false;
+  }
 };
 
-export const deleteImagesFromCloudinary = async (publicId: string[]) => {
-  return new Promise((resolve, reject) => {
-    cloudinary.api.delete_resources(publicId, (error, result) => {
-      if (error) {
-        console.log(
-          "[Error]: error in deleteImagesFromCloudinary ",
-          error,
-          publicId
-        );
-        return reject(error);
-      }
-      resolve(result);
-    });
-  });
+export interface RestoreImagesReturn {
+  restoredImages: UploadApiResponse[];
+  isAllDeleted: boolean;
+}
+const restoreImagesOnCloudinary = async (
+  imageUrls: string[]
+): Promise<RestoreImagesReturn> => {
+  let isAllDeleted = false;
+  try {
+    const restoredImages = await Promise.all(
+      imageUrls.map((url) => cloudinary.uploader.upload(url))
+    );
+
+    if (restoredImages.length !== imageUrls.length) {
+      isAllDeleted = false;
+      console.error("Error: Not all images were restored successfully");
+    } else {
+      isAllDeleted = true;
+      console.log("All images restored successfully");
+    }
+    return { restoredImages, isAllDeleted };
+  } catch (error) {
+    console.error("Error restoring images on Cloudinary:", error);
+    return { restoredImages: [], isAllDeleted };
+  }
 };
+
+export { deleteImagesOnCloudinary, restoreImagesOnCloudinary };

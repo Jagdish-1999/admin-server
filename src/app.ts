@@ -23,8 +23,10 @@ app.use(
 // routes
 import { productRouter } from "./routes/product.route";
 import { userRouter } from "./routes/user.route";
+import { categoryRouter } from "./routes/category.route";
 
-app.use("/api/v1/products", productRouter);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/products", productRouter);
+app.use("/api/v1/category", categoryRouter);
 
 export { app };
