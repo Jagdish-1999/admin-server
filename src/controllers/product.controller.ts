@@ -13,7 +13,6 @@ import {
   restoreImagesOnCloudinary,
 } from "../utils/cloudinary-actions";
 import { logger } from "../utils/logger";
-import { UploadApiResponse } from "cloudinary";
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find({ __v: 0 }).sort({ updatedAt: -1 });

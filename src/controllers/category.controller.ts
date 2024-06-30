@@ -3,8 +3,10 @@ import { ApiError } from "../utils/api-error";
 import { ApiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
 
-const fetchCategories = asyncHandler(async (req, res) => {
-  const categoryDocs: CategoryType[] = await Category.find();
+const fetchCategories = asyncHandler(async (_req, res) => {
+  const categoryDocs: CategoryType[] = await Category.find({ __v: 0 }).sort({
+    updatedAt: -1,
+  });
 
   const data = categoryDocs.map((c) => ({
     createdAt: c.createdAt,
