@@ -1,6 +1,6 @@
 import { Document, Schema, model, models } from "mongoose";
 
-export interface CategoryType extends Document {
+export interface CategoryDocument extends Document {
   createdAt: string;
   updatedAt: string;
   name: string;
@@ -18,4 +18,4 @@ const categorySchema = new Schema(
 );
 
 export const Category =
-  models.Category || model<CategoryType>("Category", categorySchema);
+  models.Category || model<CategoryDocument>("Category", categorySchema);
