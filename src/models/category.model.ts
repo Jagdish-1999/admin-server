@@ -4,6 +4,7 @@ export interface CategoryDocument extends Document {
   createdAt: string;
   updatedAt: string;
   name: string;
+  parent: CategoryDocument;
   _id: string;
 }
 
@@ -13,9 +14,9 @@ const categorySchema = new Schema(
       type: String,
       required: true,
     },
+    parent: { type: Schema.Types.ObjectId, ref: "Category" },
   },
   { timestamps: true }
 );
 
-export const Category =
-  models.Category || model<CategoryDocument>("Category", categorySchema);
+export const Category = model<CategoryDocument>("Category", categorySchema);

@@ -5,15 +5,16 @@ import { asyncHandler } from "../utils/async-handler";
 import { logger } from "../utils/logger";
 
 const fetchCategories = asyncHandler(async (_req, res) => {
-  const categoryDocs: CategoryDocument[] = await Category.find({ __v: 0 }).sort(
-    {
+  const categoryDocs: CategoryDocument[] = await Category.find({ __v: 0 })
+    .populate("parent")
+    .sort({
       updatedAt: -1,
-    }
-  );
+    });
 
   const data = categoryDocs.map((c) => ({
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
+    parent: c.parent,
     name: c.name,
     id: c._id,
   }));
@@ -28,7 +29,7 @@ const fetchCategories = asyncHandler(async (_req, res) => {
 });
 
 const createUpdateCategory = asyncHandler(async (req, res) => {
-  const { name, id } = req.body;
+  const { name, id, parent } = req.body;
   if (!name) {
     throw new ApiError({
       statusCode: 400,
@@ -39,21 +40,32 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
   let category: CategoryDocument | null = null;
 
   if (id) {
-    logger("id", id);
     try {
       category = await Category.findByIdAndUpdate(
         { _id: id },
-        { $set: { name } },
+        { $set: { name, parent } },
         { new: true, upsert: true } // Create new if it doesn't exist)
       );
     } catch (error) {}
   } else {
-    category = await Category.create({ name });
+    category = await Category.create({ name, parent });
   }
+
+  if (!category) {
+    throw new ApiError({
+      statusCode: 500,
+      message: "category not created or updated",
+    });
+  }
+
+  const populatedCategory = await Category.findOne({ _id: category._id })
+    .populate("parent")
+    .sort({ updatedAt: -1 });
+
   res.status(201).json(
     new ApiResponse({
       statusCode: 201,
-      data: category,
+      data: populatedCategory,
       message: id
         ? "Category updated successfully"
         : "Category created successfully",
