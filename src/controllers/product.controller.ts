@@ -15,7 +15,10 @@ import {
 import { logger } from "../utils/logger";
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
-  const products = await Products.find({ __v: 0 }).sort({ updatedAt: -1 });
+  const products = await Products.find()
+    .populate("category")
+    .sort({ updatedAt: -1 });
+
   res.json(
     new ApiResponse({
       statusCode: 200,
@@ -74,18 +77,25 @@ const createUpdateProduct = asyncHandler(
       );
     } else {
       // Create a new product
-      product = new Products<ProductDocument>({
-        ...body,
-        images: imageFiles,
-      }) as ProductDocument;
-      await product.save();
+      // product = new Products<ProductDocument>({
+      //   ...body,
+      //   images: imageFiles,
+      // }) as ProductDocument;
+      // await product.save();
+      product = await Products.create({ ...body, images: imageFiles });
     }
 
     if (product) {
+      const populatedProduct = await Products.findOne({
+        _id: product._id,
+      }).populate("category");
+
+      const p = product.toObject();
+
       res.json(
         new ApiResponse({
           statusCode: 200,
-          data: product,
+          data: populatedProduct,
           message: id
             ? "Product updated successfully"
             : "Product created successfully",
@@ -181,49 +191,6 @@ const deleteProductWithIds = asyncHandler(
         message: "Product deleted successfully",
       })
     );
-
-    //!========================
-    // const response = await Promise.all(
-    //   productIds.map(async (id: string) => {
-    //     const productForDelete = (await Products.findById(
-    //       id
-    //     )) as ProductDocument;
-    //     if (productForDelete.images.length) {
-    //       const ids = productForDelete.images.map((imgObj) => imgObj.id);
-    //       await deleteImagesOnCloudinary(ids);
-    //     }
-    //     return await Products.deleteOne({ _id: id });
-    //   })
-    // );
-    // logger("cloudinaryResponse", cloudinaryResponse);
-    // logger("Response", response);
-    // res.json(
-    //   new ApiResponse({
-    //     statusCode: 200,
-    //     data: [
-    //       response.filter(
-    //         (notDeletedProduct) => !notDeletedProduct.acknowledged
-    //       ),
-    //     ],
-    //     message: "Product deleted successfully",
-    //   })
-    // );
-
-    //!====================
-    // if (response.acknowledged) {
-    //   res.json(
-    //     new ApiResponse({
-    //       statusCode: 200,
-    //       data: [],
-    //       message: "Product deleted successfully",
-    //     })
-    //   );
-    // } else {
-    //   throw new ApiError({
-    //     statusCode: 500,
-    //     message: "Product not deleted!",
-    //   });
-    // }
   }
 );
 

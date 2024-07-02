@@ -12,7 +12,9 @@ const categorySchema = new Schema(
   {
     name: {
       type: String,
+      lowercase: true,
       required: true,
+      trim: true,
     },
     parent: { type: Schema.Types.ObjectId, ref: "Category" },
   },

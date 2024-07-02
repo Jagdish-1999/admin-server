@@ -1,5 +1,6 @@
 import { Document, Schema, model, models } from "mongoose";
 import { ProductImagesTypes } from "../types";
+import { CategoryDocument } from "./category.model";
 
 export interface ProductDocument extends Document {
   productName: string;
@@ -7,6 +8,7 @@ export interface ProductDocument extends Document {
   price: number;
   qty: number;
   images: ProductImagesTypes[];
+  category?: CategoryDocument;
 }
 
 const imageSchema = new Schema(
@@ -28,6 +30,7 @@ const productSchema = new Schema<ProductDocument>(
     productName: {
       type: String,
       required: true,
+      trim: true,
     },
     description: {
       type: String,
@@ -45,9 +48,13 @@ const productSchema = new Schema<ProductDocument>(
       type: [imageSchema],
       required: false,
     },
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-export const Products =
-  models.Products || model<ProductDocument>("Products", productSchema);
+export const Products = model<ProductDocument>("Products", productSchema);
