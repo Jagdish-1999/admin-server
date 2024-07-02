@@ -61,4 +61,29 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
   );
 });
 
-export { createUpdateCategory, fetchCategories };
+const deleteCategoryWithIds = asyncHandler(async (req, res) => {
+  const categoryIds = req.body;
+
+  const deletedIds = await Promise.all(
+    categoryIds.map(async (eachId: string) => {
+      try {
+        return await Category.findByIdAndDelete(eachId);
+      } catch (error) {
+        console.log(`${eachId} is not deleted`);
+      }
+    })
+  );
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      data: deletedIds,
+      message:
+        categoryIds.length === 1
+          ? "Category deleted successfully"
+          : "Categories deleted successfully",
+    })
+  );
+});
+
+export { createUpdateCategory, fetchCategories, deleteCategoryWithIds };
