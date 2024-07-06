@@ -29,7 +29,8 @@ const fetchCategories = asyncHandler(async (_req, res) => {
 });
 
 const createUpdateCategory = asyncHandler(async (req, res) => {
-  const { name, id, parent } = req.body;
+  const { name, id, parent, properties } = req.body;
+
   if (!name) {
     throw new ApiError({
       statusCode: 400,
@@ -48,7 +49,7 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
       );
     } catch (error) {}
   } else {
-    category = await Category.create({ name, parent });
+    category = await Category.create({ name, parent, properties });
   }
 
   if (!category) {
