@@ -8,7 +8,7 @@ export interface CategoryDocument extends Document {
   updatedAt: string;
   name: string;
   parent?: ObjectId | null;
-  properties?: null;
+  properties?: [ObjectId] | null;
   _id: string;
 }
 
@@ -29,7 +29,7 @@ const categorySchema = new Schema(
         typeof value === "string" && value.trim() === "" ? null : value,
     },
     properties: {
-      type: Object,
+      type: [Object],
       required: false,
     },
   },

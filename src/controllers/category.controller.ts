@@ -2,7 +2,6 @@ import { Category, CategoryDocument } from "../models/category.model";
 import { ApiError } from "../utils/api-error";
 import { ApiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
-import { logger } from "../utils/logger";
 
 const fetchCategories = asyncHandler(async (_req, res) => {
   const categoryDocs: CategoryDocument[] = await Category.find({ __v: 0 })
@@ -14,6 +13,7 @@ const fetchCategories = asyncHandler(async (_req, res) => {
   const data = categoryDocs.map((c) => ({
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
+    properties: c.properties,
     parent: c.parent,
     name: c.name,
     id: c._id,
@@ -44,7 +44,7 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
     try {
       category = await Category.findByIdAndUpdate(
         { _id: id },
-        { $set: { name, parent } },
+        { $set: { name, parent, properties } },
         { new: true, upsert: true } // Create new if it doesn't exist)
       );
     } catch (error) {}
