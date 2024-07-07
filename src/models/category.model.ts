@@ -28,10 +28,12 @@ const categorySchema = new Schema(
       set: (value: any) =>
         typeof value === "string" && value.trim() === "" ? null : value,
     },
-    properties: {
-      type: [Object],
-      required: false,
-    },
+    properties: [
+      {
+        type: Object,
+        required: false,
+      },
+    ],
   },
   { timestamps: true }
 );

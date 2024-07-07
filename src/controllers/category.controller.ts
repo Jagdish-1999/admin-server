@@ -3,6 +3,13 @@ import { ApiError } from "../utils/api-error";
 import { ApiResponse } from "../utils/api-response";
 import { asyncHandler } from "../utils/async-handler";
 
+interface RequestBodyProps {
+  name: string;
+  id: string | undefined;
+  parent: string;
+  properties: { propertyName: string; propertyValue: string }[];
+}
+
 const fetchCategories = asyncHandler(async (_req, res) => {
   const categoryDocs: CategoryDocument[] = await Category.find({ __v: 0 })
     .populate("parent")
@@ -29,7 +36,7 @@ const fetchCategories = asyncHandler(async (_req, res) => {
 });
 
 const createUpdateCategory = asyncHandler(async (req, res) => {
-  const { name, id, parent, properties } = req.body;
+  const { name, id, parent, properties }: RequestBodyProps = req.body;
 
   if (!name) {
     throw new ApiError({
@@ -44,12 +51,32 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
     try {
       category = await Category.findByIdAndUpdate(
         { _id: id },
-        { $set: { name, parent, properties } },
+        {
+          $set: {
+            name,
+            parent: parent === "" ? null : parent,
+            properties: properties.map((each) => ({
+              name: each.propertyName,
+              values: each.propertyValue
+                .split(",")
+                .map((eachValue) => eachValue.trim()),
+            })),
+          },
+        },
         { new: true, upsert: true } // Create new if it doesn't exist)
       );
     } catch (error) {}
   } else {
-    category = await Category.create({ name, parent, properties });
+    category = await Category.create({
+      name,
+      parent: parent === "" ? null : parent,
+      properties: properties.map((each) => ({
+        name: each.propertyName,
+        values: each.propertyValue
+          .split(",")
+          .map((eachValue) => eachValue.trim()),
+      })),
+    });
   }
 
   if (!category) {
