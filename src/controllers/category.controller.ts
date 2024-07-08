@@ -5,30 +5,21 @@ import { asyncHandler } from "../utils/async-handler";
 
 interface RequestBodyProps {
   name: string;
-  id: string | undefined;
+  _id: string | undefined;
   parent: string;
   properties: { propertyName: string; propertyValue: string }[];
 }
 
 const fetchCategories = asyncHandler(async (_req, res) => {
-  const categoryDocs: CategoryDocument[] = await Category.find({ __v: 0 })
+  const categoryDocs: CategoryDocument[] = await Category.find()
     .populate("parent")
     .sort({
       updatedAt: -1,
     });
 
-  const data = categoryDocs.map((c) => ({
-    createdAt: c.createdAt,
-    updatedAt: c.updatedAt,
-    properties: c.properties,
-    parent: c.parent,
-    name: c.name,
-    id: c._id,
-  }));
-
   res.json(
     new ApiResponse({
-      data,
+      data: categoryDocs,
       statusCode: 200,
       message: "Category fetched successfully",
     })
@@ -36,7 +27,7 @@ const fetchCategories = asyncHandler(async (_req, res) => {
 });
 
 const createUpdateCategory = asyncHandler(async (req, res) => {
-  const { name, id, parent, properties }: RequestBodyProps = req.body;
+  const { name, _id, parent, properties }: RequestBodyProps = req.body;
 
   if (!name) {
     throw new ApiError({
@@ -47,10 +38,10 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
 
   let category: CategoryDocument | null = null;
 
-  if (id) {
+  if (_id) {
     try {
       category = await Category.findByIdAndUpdate(
-        { _id: id },
+        { _id },
         {
           $set: {
             name,
@@ -94,7 +85,7 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
     new ApiResponse({
       statusCode: 201,
       data: populatedCategory,
-      message: id
+      message: _id
         ? "Category updated successfully"
         : "Category created successfully",
     })
