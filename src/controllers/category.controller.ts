@@ -7,7 +7,7 @@ interface RequestBodyProps {
   name: string;
   _id: string | undefined;
   parent: string;
-  properties: { propertyName: string; propertyValue: string }[];
+  properties: { name: string; values: string[] }[];
 }
 
 const fetchCategories = asyncHandler(async (_req, res) => {
@@ -47,10 +47,8 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
             name,
             parent: parent === "" ? null : parent,
             properties: properties.map((each) => ({
-              name: each.propertyName,
-              values: each.propertyValue
-                .split(",")
-                .map((eachValue) => eachValue.trim()),
+              name: each.name,
+              values: each.values.map((eachValue) => eachValue.trim()),
             })),
           },
         },
@@ -62,10 +60,8 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
       name,
       parent: parent === "" ? null : parent,
       properties: properties.map((each) => ({
-        name: each.propertyName,
-        values: each.propertyValue
-          .split(",")
-          .map((eachValue) => eachValue.trim()),
+        name: each.name,
+        values: each.values.map((eachValue) => eachValue.trim()),
       })),
     });
   }

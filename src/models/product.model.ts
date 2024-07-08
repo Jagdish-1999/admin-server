@@ -9,6 +9,7 @@ export interface ProductDocument extends Document {
   quantity: number;
   images: ProductImagesTypes[];
   category?: CategoryDocument;
+  properties: [Object] | null;
 }
 
 const imageSchema = new Schema(
@@ -53,6 +54,12 @@ const productSchema = new Schema<ProductDocument>(
       ref: "Category",
       required: true,
     },
+    properties: [
+      {
+        type: Object,
+        required: false,
+      },
+    ],
   },
   { timestamps: true }
 );

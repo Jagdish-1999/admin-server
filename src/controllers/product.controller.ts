@@ -14,6 +14,21 @@ import {
 } from "../utils/cloudinary-actions";
 import { logger } from "../utils/logger";
 
+export interface ProductPropertiesTypes {
+  name: string;
+  value: string;
+}
+
+export interface CreateUpdateProductTypes {
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  category: string;
+  properties: ProductPropertiesTypes[];
+  images: ProductImagesTypes[];
+}
+
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find()
     .populate("category")
@@ -31,7 +46,7 @@ const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
 const createUpdateProduct = asyncHandler(
   async (req: Request, res: Response) => {
     const { images, payload } = req.body;
-    const body = JSON.parse(payload);
+    const body: CreateUpdateProductTypes = JSON.parse(payload);
     const imagesInPayload: string[] = JSON.parse(images || "[]");
     const id = req.params.id;
     const files = req.files as Express.Multer.File[];
@@ -68,11 +83,14 @@ const createUpdateProduct = asyncHandler(
       );
     }
     const productData = { ...body, images: [...existingImages, ...imageFiles] };
+    const properties = productData.properties.filter(
+      (property) => property.value
+    );
     if (product) {
       // Check if product exists and update it
       product = await Products.findOneAndUpdate(
         { _id: id },
-        { $set: productData },
+        { $set: { ...productData, properties } },
         { new: true, upsert: true } // Create new if it doesn't exist
       );
     } else {
@@ -82,15 +100,17 @@ const createUpdateProduct = asyncHandler(
       //   images: imageFiles,
       // }) as ProductDocument;
       // await product.save();
-      product = await Products.create({ ...body, images: imageFiles });
+      product = await Products.create({
+        ...body,
+        images: imageFiles,
+        properties,
+      });
     }
 
     if (product) {
       const populatedProduct = await Products.findOne({
         _id: product._id,
       }).populate("category");
-
-      const p = product.toObject();
 
       res.json(
         new ApiResponse({
