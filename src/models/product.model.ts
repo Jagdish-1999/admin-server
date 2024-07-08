@@ -3,10 +3,10 @@ import { ProductImagesTypes } from "../types";
 import { CategoryDocument } from "./category.model";
 
 export interface ProductDocument extends Document {
-  productName: string;
+  name: string;
   description: string;
   price: number;
-  qty: number;
+  quantity: number;
   images: ProductImagesTypes[];
   category?: CategoryDocument;
 }
@@ -27,7 +27,7 @@ const imageSchema = new Schema(
 
 const productSchema = new Schema<ProductDocument>(
   {
-    productName: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -40,7 +40,7 @@ const productSchema = new Schema<ProductDocument>(
       type: Number,
       required: true,
     },
-    qty: {
+    quantity: {
       type: Number,
       required: true,
     },
