@@ -31,6 +31,7 @@ export interface CreateUpdateProductTypes {
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find()
+    .select("-__v")
     .populate("category")
     .sort({ updatedAt: -1 });
 
@@ -65,7 +66,7 @@ const createUpdateProduct = asyncHandler(
     let product: ProductDocument | null = null;
     let existingImages: ProductImagesTypes[] = [];
     if (id) {
-      product = (await Products.findById(id)) as ProductDocument;
+      product = (await Products.findById(id).select("-__v")) as ProductDocument;
       const imagesOnDB = product.images;
       let availableIdsForDelete: string[] = [];
       if (imagesInPayload.length) {
@@ -110,7 +111,9 @@ const createUpdateProduct = asyncHandler(
     if (product) {
       const populatedProduct = await Products.findOne({
         _id: product._id,
-      }).populate("category");
+      })
+        .populate("category")
+        .select("-__v");
 
       res.json(
         new ApiResponse({

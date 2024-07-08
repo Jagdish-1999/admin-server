@@ -110,7 +110,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("-__v");
 
   if (!user) {
     throw new ApiError({
@@ -137,14 +137,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
       new ApiResponse({
         statusCode: 200,
         message: "User logged in successfully",
-        data: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          avatar: user.avatar,
-          createdAt: user.createdAt,
-          updatedAte: user.updatedAt,
-        },
+        data: user,
       })
     );
 });

@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { User, UserType } from "../models/user.model";
 import { ApiError } from "../utils/api-error";
 import { asyncHandler } from "../utils/async-handler";
+import { logger } from "../utils/logger";
 
 const verifyJWT: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -37,6 +38,7 @@ const verifyJWT: RequestHandler = asyncHandler(
       req.user = user as UserType;
       next();
     } catch (error: any) {
+      logger("[error] verifyJWT", error);
       throw new ApiError({ statusCode: 401, message: error?.message });
     }
   }

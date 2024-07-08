@@ -74,6 +74,7 @@ const createUpdateCategory = asyncHandler(async (req, res) => {
   }
 
   const populatedCategory = await Category.findOne({ _id: category._id })
+    .select("-__v")
     .populate("parent")
     .sort({ updatedAt: -1 });
 
