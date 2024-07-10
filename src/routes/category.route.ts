@@ -4,12 +4,13 @@ import {
   deleteCategoryWithIds,
   fetchCategories,
 } from "../controllers/category.controller";
+import { verifyJWT } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
-router.route("/").get(fetchCategories);
-router.route("/create").post(createUpdateCategory);
-router.route("/update").put(createUpdateCategory);
-router.route("/delete").delete(deleteCategoryWithIds);
+router.route("/").get(verifyJWT, fetchCategories);
+router.route("/create").post(verifyJWT, createUpdateCategory);
+router.route("/update").put(verifyJWT, createUpdateCategory);
+router.route("/delete").delete(verifyJWT, deleteCategoryWithIds);
 
 export { router as categoryRouter };

@@ -9,21 +9,18 @@ cloudinary.config({
 
 // Define an upload middleware function
 export const uploadImageToCloudinary = async (
-  bufferData: any,
+  filePath: string,
   folder?: string
 ) => {
   try {
-    if (!bufferData) {
+    if (!filePath) {
       throw new Error("Image not found");
     }
     // Upload file to Cloudinary
-    const result = await cloudinary.uploader.upload(
-      bufferData.toString("base64"),
-      {
-        resource_type: "image",
-        folder: folder ? `ecommerse-admin/${folder}` : "ecommerse-admin", // Optional folder in Cloudinary,
-      }
-    );
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: "image",
+      folder: folder ? `ecommerse-admin/${folder}` : "ecommerse-admin", // Optional folder in Cloudinary,
+    });
     return result;
   } catch (error) {
     console.error("Error uploading image to Cloudinary:", error);

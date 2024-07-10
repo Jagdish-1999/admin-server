@@ -6,7 +6,6 @@ import { ApiError } from "../utils/api-error";
 import { ApiResponse } from "../utils/api-response";
 import { uploadImageToCloudinary } from "../middlewares/cloudinary.middleware";
 import { unlinkFile } from "../utils/unlinkFile";
-import { logger } from "../utils/logger";
 
 // these option are allowing that cookie is modifiable only on server not on user machine
 export const cookiesOptions = {
@@ -39,8 +38,6 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 
   const isUserExist = await User.findOne({ email });
   const avatarLocalPath = req.file?.path;
-
-  logger("is user exist", isUserExist);
 
   if (isUserExist) {
     unlinkFile(avatarLocalPath);
@@ -154,8 +151,6 @@ const logoutUser = asyncHandler(async (req, res) => {
       new: true,
     }
   );
-
-  logger("User", user);
 
   res
     .status(200)
