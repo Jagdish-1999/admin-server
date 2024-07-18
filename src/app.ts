@@ -24,9 +24,11 @@ app.use(
 import { productRouter } from "./routes/product.route";
 import { userRouter } from "./routes/user.route";
 import { categoryRouter } from "./routes/category.route";
+import { orderRouter } from "./routes/order.route";
 
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRouter);
-app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/orders", orderRouter);
 
 export { app };

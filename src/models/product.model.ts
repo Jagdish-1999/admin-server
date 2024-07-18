@@ -10,6 +10,8 @@ export interface ProductDocument extends Document {
   images: ProductImagesTypes[];
   category?: CategoryDocument;
   properties: [Object] | null;
+  isAddedToWishlist?: boolean;
+  isAddedToCart?: boolean;
 }
 
 const imageSchema = new Schema(
@@ -60,6 +62,16 @@ const productSchema = new Schema<ProductDocument>(
         required: false,
       },
     ],
+    isAddedToWishlist: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    isAddedToCart: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   { timestamps: true }
 );

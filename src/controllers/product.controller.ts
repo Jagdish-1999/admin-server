@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import path from "path";
 import fs from "fs";
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/async-handler";
 import { ApiResponse } from "../utils/api-response";
 import { ProductDocument, Products } from "../models/product.model";
@@ -12,7 +13,6 @@ import {
   deleteImagesOnCloudinary,
   restoreImagesOnCloudinary,
 } from "../utils/cloudinary-actions";
-import { logger } from "../utils/logger";
 
 export interface ProductPropertiesTypes {
   name: string;
@@ -31,7 +31,7 @@ export interface CreateUpdateProductTypes {
 
 const fetchProducts = asyncHandler(async (_req: Request, res: Response) => {
   const products = await Products.find()
-    .select("-__v")
+    .select("-__v -isAddedToCart -isAddedToWishlist")
     .populate("category")
     .sort({ updatedAt: -1 });
 
@@ -172,7 +172,6 @@ const deleteProductWithIds = asyncHandler(
         //? TRY TO DELETE IMAGE ON CLOUDINARY
 
         const areImagesDeleted = await deleteImagesOnCloudinary(imagePublicIds);
-        logger("areImagesDeleted", areImagesDeleted);
 
         //? IF IMAGES NOT DELETED ON CLOUDINARY
 
@@ -217,4 +216,96 @@ const deleteProductWithIds = asyncHandler(
   }
 );
 
-export { fetchProducts, createUpdateProduct, deleteProductWithIds };
+const addToCartWishlist = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const isWishlistCall = req.url.includes("wishlist");
+
+  if (!id) {
+    throw new ApiError({ statusCode: 400, message: "Product id is required" });
+  }
+
+  const product = await Products.findById(id);
+
+  if (!product) {
+    throw new ApiError({ statusCode: 400, message: "No such product found" });
+  }
+
+  const updatedProduct = await Products.findOneAndUpdate(
+    { _id: id },
+    {
+      $set: isWishlistCall
+        ? {
+            isAddedToWishlist: !product.isAddedToWishlist,
+          }
+        : { isAddedToCart: !product.isAddedToCart },
+    },
+    { new: true, upsert: true, timestamps: false }
+  );
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Added to wishlist successfully",
+      data: updatedProduct,
+    })
+  );
+});
+
+const fetchWishlistProducts = asyncHandler(async (_req, res) => {
+  const items = await Products.aggregate([
+    { $match: { isAddedToWishlist: true } },
+    { $group: { _id: null, ids: { $push: "$_id" } } },
+    { $project: { _id: 0, ids: 1 } },
+  ]);
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "WishListed product fetched successfully",
+      data: items?.[0]?.ids || [],
+    })
+  );
+});
+
+const fetchCartProducts = asyncHandler(async (_req, res) => {
+  const items = await Products.aggregate([
+    { $match: { isAddedToCart: true } },
+    { $group: { _id: null, ids: { $push: "$_id" } } },
+    { $project: { _id: 0, ids: 1 } },
+  ]);
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Cart product fetched successfully",
+      data: items?.[0]?.ids || [],
+    })
+  );
+});
+
+const fetchSelectedProductsWithIds = asyncHandler(async (req, res) => {
+  const ids: string[] = req.body;
+
+  const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
+  const selectedProducts = await Products.find({
+    _id: { $in: objectIds },
+  }).select("-__v -isAddedToCart -isAddedToWishlist -createdAt -updatedAt");
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Success",
+      data: selectedProducts,
+    })
+  );
+});
+
+export {
+  fetchProducts,
+  createUpdateProduct,
+  deleteProductWithIds,
+  addToCartWishlist,
+  fetchWishlistProducts,
+  fetchCartProducts,
+  fetchSelectedProductsWithIds,
+};

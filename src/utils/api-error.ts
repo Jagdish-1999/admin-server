@@ -10,6 +10,7 @@ class ApiError extends Error {
   data: null;
   success: boolean;
   errors: any[];
+  message: string;
 
   constructor({
     statusCode,
