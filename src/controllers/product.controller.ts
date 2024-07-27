@@ -13,6 +13,7 @@ import {
   deleteImagesOnCloudinary,
   restoreImagesOnCloudinary,
 } from "../utils/cloudinary-actions";
+import { logger } from "../utils/logger";
 
 export interface ProductPropertiesTypes {
   name: string;
@@ -300,6 +301,24 @@ const fetchSelectedProductsWithIds = asyncHandler(async (req, res) => {
   );
 });
 
+const fetchPDPProduct = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new ApiError({ statusCode: 400, message: "Product is is required" });
+  }
+
+  const product = await Products.findById(id);
+
+  res.json(
+    new ApiResponse({
+      statusCode: 200,
+      message: "Success",
+      data: product,
+    })
+  );
+});
+
 export {
   fetchProducts,
   createUpdateProduct,
@@ -308,4 +327,5 @@ export {
   fetchWishlistProducts,
   fetchCartProducts,
   fetchSelectedProductsWithIds,
+  fetchPDPProduct,
 };

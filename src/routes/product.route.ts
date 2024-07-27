@@ -7,6 +7,7 @@ import {
   fetchSelectedProductsWithIds,
   fetchProducts,
   fetchWishlistProducts,
+  fetchPDPProduct,
 } from "../controllers/product.controller";
 import { uploadImages } from "../middlewares/multer.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
@@ -26,5 +27,6 @@ router.route("/cart/:id").patch(addToCartWishlist);
 router.route("/wishlist").get(fetchWishlistProducts);
 router.route("/cart").get(fetchCartProducts);
 router.route("/selected-products").post(fetchSelectedProductsWithIds);
+router.route("/:id").get(fetchPDPProduct);
 
 export { router as productRouter };
